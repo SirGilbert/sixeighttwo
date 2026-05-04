@@ -30,12 +30,14 @@ SLA_RULES = {
 
 # =========================
 # 🗄️ DB CONNECTION
+import os
+
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Victoria_123.",   # 👈 hardcode it (for now)
-        database="sis_system"
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME")
     )
 print("DB PASSWORD:", "Victoria_123.")
 

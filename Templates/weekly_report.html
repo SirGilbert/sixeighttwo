@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SixEightTwo Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .card p {
+            font-size: 22px;
+            margin: 5px 0 0 0;
+            font-weight: bold;
+        }
+
+        .red { color: #ff4d4d; }
+        .yellow { color: #ffcc00; }
+        .green { color: #4ade80; }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+            font-size: 14px;
+        }
+
+        th {
+            background: #0b1220;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .ok { background: #14532d; color: #4ade80; }
+        .breach { background: #450a0a; color: #ff4d4d; }
+        .delay { background: #3b2f00; color: #ffcc00; }
+    </style>
+</head>
+
+<body>
+
+<h1>SixEightTwo Dashboard</h1>
+
+<!-- KPI CARDS -->
+<div class="kpi-grid">
+
+    <div class="card">
+        <h2>Total Jobs</h2>
+        <p>{{ jobs|length }}</p>
+    </div>
+
+    <div class="card">
+        <h2>SLA Breaches</h2>
+        <p class="red">
+            {{ jobs | selectattr('sla_flag','equalto','SLA BREACH') | list | length }}
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Delays</h2>
+        <p class="yellow">
+            {{ jobs | selectattr('sla_flag','in',['PARTS DELAY','LONG WAIT']) | list | length }}
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Healthy</h2>
+        <p class="green">
+            {{ jobs | rejectattr('sla_flag','equalto','SLA BREACH') | list | length }}
+        </p>
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<table>
+    <tr>
+        <th>Job ID</th>
+        <th>Client</th>
+        <th>Device</th>
+        <th>Status</th>
+        <th>Days Open</th>
+        <th>SLA</th>
+    </tr>
+
+    {% for job in jobs %}
+    <tr style="border-left: 5px solid {{ job.color }};">
+        <td>{{ job.job_id }}</td>
+        <td>{{ job.customer }}</td>
+        <td>{{ job.device }}</td>
+        <td>{{ job.status_label }}</td>
+        <td>{{ job.days_open }}</td>
+        <td>
+            {% if job.sla_flag == 'OK' %}
+                <span class="badge ok">OK</span>
+            {% elif job.sla_flag == 'SLA BREACH' %}
+                <span class="badge breach">BREACH</span>
+            {% else %}
+                <span class="badge delay">{{ job.sla_flag }}</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>

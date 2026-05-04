@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SixEightTwo Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            height: 60px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 0;
+        }
+
+		.grid {
+		    display: grid;
+		    grid-template-columns: repeat(5, 1fr); /* now 5 blocks */
+		    gap: 20px;
+		    margin-bottom: 20px;
+        }
+
+		table {
+		    width: 100%;
+		    border-collapse: collapse;
+		}
+
+		thead th {
+		    background: #020617;
+		}
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            color: #e5e7eb;
+        }
+		
+		/* 📌 FREEZE FIRST COLUMN */
+		th:first-child,
+		td:first-child {
+		    position: sticky;
+		    left: 0;
+		    z-index: 1;
+		}
+
+		/* Header must sit above cells */
+		th:first-child {
+		    z-index: 3;
+		    background: #020617;
+		}
+
+		/* Body cells background (match rows so no overlap glitch) */
+		td:first-child {
+		    background: #1e293b;
+		}
+
+		th {
+		    background: #020617;
+		    color: #38bdf8;
+
+		    position: sticky;
+		    top: 0;
+		    z-index: 2;
+		}
+
+        tr:nth-child(even) {
+            background: #1e293b;
+        }
+
+        /* ✅ RESTORED HOVER EFFECT */
+        tr:hover {
+            background: #334155 !important;
+            transition: 0.2s ease;
+        }
+
+        /* ✅ RESTORED COLOR CATEGORY ROWS */
+        .ok-row {
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        .breach-row {
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .delay-row {
+            background: rgba(234, 179, 8, 0.08);
+        }
+
+        .upload-box {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background: #3b82f6;
+            border: none;
+            padding: 8px 12px;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+		.risk-row {
+		    background: rgba(59, 130, 246, 0.15);
+		}
+		
+		/* 🔴 IMMINENT GLOW */
+		.imminent-row {
+		    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+		    border-left: 4px solid #ef4444;
+		}
+
+		/* 🟠 WARNING GLOW */
+		.warning-row {
+		    border-left: 4px solid #f59e0b;
+		}
+
+		/* 🟢 SAFE subtle */
+		.safe-row {
+		    opacity: 0.9;
+		}
+        /* =========================
+           CHART LAYOUT FIX (SAFE)
+        ========================= */
+        .chart-row {
+            display: flex;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .chart-box {
+            flex: 1;
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .chart-wrapper {
+            height: 280px;
+            position: relative;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+		
+		/* 🔁 KEEP COLOR ON FROZEN COLUMN */
+		.ok-row td:first-child {
+		    background: rgba(34, 197, 94, 0.08);
+		}
+
+		.breach-row td:first-child {
+		    background: rgba(239, 68, 68, 0.08);
+		}
+
+		.delay-row td:first-child {
+		    background: rgba(234, 179, 8, 0.08);
+		}
+
+		.risk-row td:first-child {
+		    background: rgba(59, 130, 246, 0.15);
+		}
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <img src="{{ url_for('static', filename='Templates/682.png') }}"
+         class="logo"
+         onerror="this.src='{{ url_for('static', filename='Templates/682.jpg') }}'">
+
+    <div class="title">SixEightTwo Dashboard</div>
+</div>
+
+<!-- UPLOAD -->
+<!-- KPI + UPLOAD (FUSED) -->
+<div class="grid">
+
+    <!-- UPLOAD -->
+    <div class="card">
+        <h3>Upload CSV</h3>
+        <form action="/upload-csv" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" style="margin-bottom:10px;">
+            <br>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+
+    <!-- OK -->
+    <div class="card">
+        <h3>OK Jobs</h3>
+        <p>{{ chart_data.ok }}</p>
+    </div>
+
+    <!-- BREACH -->
+    <div class="card">
+        <h3>SLA Breaches</h3>
+        <p>{{ chart_data.breach }}</p>
+    </div>
+
+    <!-- DELAY -->
+    <div class="card">
+        <h3>Delays</h3>
+        <p>{{ chart_data.delay }}</p>
+    </div>
+	
+	<!-- AT RISK -->
+	<div class="card">
+	    <h3>⚠️ At Risk</h3>
+	    <p>{{ chart_data.risk }}</p>
+	</div>
+
+</div>
+
+<!-- =========================
+     AT RISK PANEL
+========================= -->
+<div class="card">
+    <h3>⚠️ At Risk Jobs (Early Warning)</h3>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Device</th>
+            <th>Technician</th>
+            <th>Days Open</th>
+            <th>Status</th>
+        </tr>
+
+        {% for job in at_risk_jobs %}
+        <tr class="risk-row">
+            <td>{{ job.job_id }}</td>
+            <td>{{ job.device }}</td>
+            <td>{{ job.technician }}</td>
+            <td>{{ job.days_open }}</td>
+            <td>{{ job.status_label }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- JOB TABLE -->
+<div class="card">
+    <h3>Jobs</h3>
+
+    <!-- 🔍 SEARCH BAR -->
+	<div style="display:flex; justify-content:flex-start;">
+	<input
+	    type="text"
+	    id="jobSearch"
+	    placeholder="Search job..."
+	    style="
+	        width: 100%;
+	        max-width: 400px;
+	        box-sizing: border-box;
+	        padding: 10px;
+	        margin: 10px 0 15px 0;
+	        border-radius: 8px;
+	        border: none;
+	        background: #020617;
+	        color: white;
+	        display: block;
+	    "
+	>
+	</div>
+
+    <div style="max-height: 500px; overflow: auto;">
+        <table id="jobsTable">
+
+    <table id="jobsTable">
+        <tr>
+            <th>ID</th>
+            <th>Device</th>
+            <th>Customer</th>
+            <th>Status</th>
+			<th onclick="sortTable(4)" style="cursor:pointer;">
+			    Days ⬍
+			</th>
+            <th>SLA</th>
+			<th>Alert</th>
+        </tr>
+
+        {% for job in jobs %}
+		<tr
+		    class="
+		    {% if job.sla_flag == 'SLA BREACH' %}breach-row
+		    {% elif job.warning_badge and '🔴' in job.warning_badge %}imminent-row
+		    {% elif job.warning_badge and '🟠' in job.warning_badge %}warning-row
+		    {% elif job.sla_flag == 'AT RISK' %}risk-row
+		    {% elif job.sla_flag == 'OK' %}ok-row safe-row
+		    {% else %}delay-row{% endif %}"
+		    onclick="toggleDetails('{{ job.job_id }}')"
+		    style="cursor: pointer;">
+            <td>{{ job.job_id }}</td>
+            <td>{{ job.device }}</td>
+            <td>{{ job.customer }}</td>
+            <td>{{ job.status_label }}</td>
+            <td>{{ job.days_open }}</td>
+            <td>{{ job.sla_flag }}</td>
+			<td>
+			    {% if job.warning_badge %}
+			        <span style="display:flex; align-items:center; gap:6px; font-size:12px;">
+
+			            <!-- DOT -->
+			            <span style="
+			                width:10px;
+			                height:10px;
+			                border-radius:50%;
+			                display:inline-block;
+			                background:
+			                    {% if '🔥' in job.warning_badge %}#ef4444
+			                    {% elif '🔴' in job.warning_badge %}#ef4444
+			                    {% elif '🟠' in job.warning_badge %}#f59e0b
+			                    {% else %}#22c55e{% endif %};
+			            "></span>
+
+			            <!-- TEXT -->
+			            <span title="Days left: {{ job.days_to_breach }}">
+			                {% if '🔥' in job.warning_badge %}
+			                    BREACHED
+			                {% elif '🔴' in job.warning_badge %}
+			                    IMMINENT
+			                {% elif '🟠' in job.warning_badge %}
+			                    WARNING
+			                {% else %}
+			                    SAFE
+			                {% endif %}
+			            </span>
+
+			        </span>
+			    {% else %}
+			        -
+			    {% endif %}
+			</td>
+        </tr>
+		
+		<tr id="details-{{ job.job_id }}" data-parent="{{ job.job_id }}" style="display: none; background:#020617;">
+		    <td colspan="7" style="padding:15px;">
+
+		        <strong>Serial:</strong> {{ job.serial_number or 'N/A' }}<br>
+		        <strong>Technician:</strong> {{ job.technician or 'Unassigned' }}<br>
+		        <strong>Location:</strong> {{ job.location or 'N/A' }}<br>
+		        <strong>Sub Status:</strong> {{ job.sub_status or 'N/A' }}<br>
+		        <strong>Amount Due:</strong> R{{ job.amount_due or 0 }}
+
+		    </td>
+		</tr>
+		
+        {% endfor %}
+    </table>
+</div>
+</div>
+
+<!-- CHARTS SIDE BY SIDE BELOW TABLE -->
+<div class="chart-row">
+
+    <div class="chart-box">
+        <h3>SLA Overview</h3>
+        <div class="chart-wrapper">
+            <canvas id="slaDonut"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <h3>Risk Scatter Map</h3>
+        <div class="chart-wrapper">
+            <canvas id="riskScatter"></canvas>
+        </div>
+    </div>
+
+</div>
+
+
+
+<script>
+/* =========================
+   DOUGHNUT (fixed sizing)
+========================= */
+new Chart(document.getElementById('slaDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: ['OK', 'At Risk', 'Breach', 'Delay'],
+        datasets: [{
+			data: [
+			    {{ chart_data.ok }},
+			    {{ chart_data.risk }},
+			    {{ chart_data.breach }},
+			    {{ chart_data.delay }}
+			],
+			backgroundColor: [
+			    '#4ade80',
+			    '#3b82f6',
+			    '#ff4d4d',
+			    '#ffcc00'
+			]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+/* =========================
+   SCATTER (fixed stretch + smooth line)
+========================= */
+new Chart(document.getElementById('riskScatter'), {
+    type: 'scatter',
+    data: {
+        datasets: [{
+            label: 'Risk Map',
+            data: [
+                {% for job in jobs %}
+                {
+                    x: {{ job.days_open }},
+                    y: {% if job.sla_flag == 'OK' %}1
+                       {% elif job.sla_flag == 'LONG WAIT' %}2
+                       {% elif job.sla_flag == 'PARTS DELAY' %}3
+                       {% elif job.sla_flag == 'SLA BREACH' %}4
+                       {% else %}0{% endif %}
+                },
+                {% endfor %}
+            ],
+            showLine: true,
+            tension: 0.4,
+            borderColor: '#60a5fa',
+            pointBackgroundColor: '#ffffff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: { title: { display: true, text: 'Days Open' } },
+            y: { title: { display: true, text: 'Risk Level' } }
+        }
+    }
+});
+</script>
+
+<div class="card">
+    <h3>👨‍🔧 Technician Accountability</h3>
+
+    <table>
+        <tr>
+            <th>Technician</th>
+            <th>Jobs</th>
+            <th>Breaches</th>
+            <th>At Risk</th>
+            <th>Score</th>
+        </tr>
+
+        {% for tech in tech_report %}
+        <tr>
+            <td>{{ tech.technician }}</td>
+            <td>{{ tech.total }}</td>
+            <td>{{ tech.breach }}</td>
+            <td>-</td>
+
+            <td>
+                <span style="
+                    padding:4px 8px;
+                    border-radius:6px;
+                    font-weight:bold;
+                    background:
+                        {% if tech.score >= 85 %}#14532d
+                        {% elif tech.score >= 60 %}#78350f
+                        {% else %}#7f1d1d{% endif %};
+                ">
+                    {{ tech.score }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- 🔍 SEARCH SCRIPT (ADD HERE, BEFORE </body>) -->
+<script>
+document.getElementById("jobSearch").addEventListener("keyup", function () {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll("#jobsTable > tbody > tr:not([id^='details-'])");
+
+    rows.forEach((row, index) => {
+        if (index === 0) return; // skip header row
+
+        let text = row.innerText.toLowerCase();
+
+        if (text.includes(filter)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+});
+</script>
+
+<script>
+function toggleDetails(jobId) {
+    const row = document.getElementById("details-" + jobId);
+
+    if (row.style.display === "none") {
+        row.style.display = "table-row";
+    } else {
+        row.style.display = "none";
+    }
+}
+</script>
+
+<script>
+let sortDirection = true; // true = ascending
+
+function sortTable(columnIndex) {
+    const table = document.getElementById("jobsTable");
+    const rows = Array.from(table.rows).slice(1); // skip header
+
+    sortDirection = !sortDirection;
+
+    rows.sort((a, b) => {
+        let x = a.cells[columnIndex].innerText.trim();
+        let y = b.cells[columnIndex].innerText.trim();
+
+        // Convert to numbers if possible
+        let numX = parseFloat(x);
+        let numY = parseFloat(y);
+
+        if (!isNaN(numX) && !isNaN(numY)) {
+            return sortDirection ? numX - numY : numY - numX;
+        }
+
+        // Otherwise sort as text
+        return sortDirection
+            ? x.localeCompare(y)
+            : y.localeCompare(x);
+    });
+
+    // Re-append sorted rows
+	rows.forEach(row => {
+	    table.appendChild(row);
+
+	    const jobId = row.cells[0].innerText.trim();
+	    const detailRow = document.querySelector(`#details-${jobId}`);
+
+	    if (detailRow) {
+	        table.appendChild(detailRow);
+	    }
+	});
+}
+</script>
+
+<script>
+window.onload = function () {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("uploaded") === "true") {
+        alert("✅ CSV uploaded successfully!");
+
+        // Clean URL (remove ?uploaded=true)
+        window.history.replaceState({}, document.title, "/");
+    }
+};
+</script>
+
+</body>
+</html>

@@ -440,16 +440,16 @@ def upload_csv():
                     location, amount_due, technician
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE
-                    device = VALUES(device),
-                    serial_number = VALUES(serial_number),
-                    customer = VALUES(customer),
-                    status = VALUES(status),
-                    sub_status = VALUES(sub_status),
-                    days_open = VALUES(days_open),
-                    location = VALUES(location),
-                    amount_due = VALUES(amount_due),
-                    technician = VALUES(technician)
+                ON CONFLICT (job_id) DO UPDATE SET
+                    device = EXCLUDED.device,
+                    serial_number = EXCLUDED.serial_number,
+                    customer = EXCLUDED.customer,
+                    status = EXCLUDED.status,
+                    sub_status = EXCLUDED.sub_status,
+                    days_open = EXCLUDED.days_open,
+                    location = EXCLUDED.location,
+                    amount_due = EXCLUDED.amount_due,
+                    technician = EXCLUDED.technician
             """, (
                 job_id, device, serial_number, customer,
                 status, sub_status, days_open,

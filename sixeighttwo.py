@@ -39,7 +39,7 @@ import psycopg2
 def get_db_connection():
     return psycopg2.connect(os.getenv("DATABASE_URL"))
 
-print("DB PASSWORD:", "Victoria_123.")
+print("DB connection initializing...")
 
 # =========================
 # 🔧 SAFE CONVERSION HELPERS
@@ -521,7 +521,8 @@ def weekly_report():
 @app.route("/weekly-report/pdf")
 def weekly_report_pdf():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    from psycopg2.extras import RealDictCursor
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("SELECT * FROM jobs")
@@ -565,4 +566,5 @@ def weekly_report_pdf():
 # 🚀 RUN APP
 # =========================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port, debug=False)

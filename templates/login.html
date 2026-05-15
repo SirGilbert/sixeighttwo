@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SixEightTwo Login</title>
+
+    <style>
+        body {
+            background: #0f172a;
+            font-family: Arial;
+            color: white;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-box {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 14px;
+            width: 320px;
+
+            box-shadow: 0 0 25px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #38bdf8;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #020617;
+            color: white;
+
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 18px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #3b82f6;
+            color: white;
+
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .footer {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <h2>SixEightTwo</h2>
+
+    <form method="POST">
+
+        <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            required
+        >
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+        >
+
+        <button type="submit">
+            Login
+        </button>
+
+    </form>
+
+    <div class="footer">
+        Version 2.0<br>
+        Product of MG Sibeko (2026)<br>
+        Powered by OpenAI, GitHub & Render
+    </div>
+
+</div>
+
+</body>
+</html>
